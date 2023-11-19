@@ -35,7 +35,7 @@ public class ChessBoard extends JComponent {
     private final int rows = 8;
     private final int cols = 8;
     private Integer[][] BoardGrid;
-    private String board_file_path = "C:\\Users\\doand\\OneDrive\\Desktop\\btl\\images\\board.png";
+    private String board_file_path = "D:\\OneDrive\\Máy tính\\btl\\images\\board.png";
     private String active_square_file_path = "C:\\Users\\doand\\OneDrive\\Desktop\\btl\\images\\active_square.png";
 
     private Knight knight;
@@ -68,7 +68,12 @@ public class ChessBoard extends JComponent {
     }
 
     public int KnightTour(int x, int y, int movei) throws InterruptedException {
-        Thread.sleep(500);
+        try {
+            Thread.sleep(800);
+        } catch (InterruptedException e) {
+            // TODO: handle exception
+            return 1;
+        }
         int nextx, nexty;
         if (movei == 8*8) {
             return 1;
@@ -82,6 +87,7 @@ public class ChessBoard extends JComponent {
             nexty = y + yMove[i];
             int degree = getDegree(nextx, nexty);
             if (isValidMove(nextx, nexty) && BoardGrid[nexty][nextx] == 0 && degree < minDegree) {
+
                 minDegree = degree;
                 minDegreeIndex = i;
             }
@@ -106,7 +112,12 @@ public class ChessBoard extends JComponent {
                 BoardGrid[y][x] = 0;
                 Black_Pieces.remove(Black_Pieces.size()-1);
                 drawBoard();
-                Thread.sleep(500);
+                try {
+                    Thread.sleep(800);
+                } catch (InterruptedException e) {
+                    // TODO: handle exception
+                    return 1;
+                }
             }
         }
         return 0;
