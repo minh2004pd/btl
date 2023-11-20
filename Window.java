@@ -24,36 +24,19 @@ public class Window extends JFrame implements ActionListener {
     private JPanel optionPanel;
     private JLabel label1;
     private JLabel label2;
+    private JLabel label3;
     private JTextField setX;
     private JTextField setY;
+    private JTextField degree;
     private JButton submitButton;
     private ChessBoard component;
     private Thread thread;
-
-    public void setMenu() {
-        optionPanel = new JPanel();
-        optionPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
-
-        label1 = new JLabel("X:");
-        label2 = new JLabel("Y:");
-
-        setX = new JTextField(5); 
-        setY = new JTextField(5); 
-
-        submitButton = new JButton("submit");
-
-        optionPanel.add(label1);
-        optionPanel.add(setX);
-        optionPanel.add(label2);
-        optionPanel.add(setY);
-        optionPanel.add(submitButton); 
-    }
 
     public Window(int x, int y) {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setTitle("Chess");
         this.setResizable(false);
-        component = new ChessBoard(x, y);
+        component = new ChessBoard(x, y, this);
         this.add(component, BorderLayout.CENTER);
 
         setMenu();
@@ -67,6 +50,34 @@ public class Window extends JFrame implements ActionListener {
         this.pack();
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public void setMenu() {
+        optionPanel = new JPanel();
+        optionPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
+
+        label1 = new JLabel("X:");
+        label2 = new JLabel("Y:");
+        label3 = new JLabel("Degree: ");
+
+        setX = new JTextField(5); 
+        setY = new JTextField(5); 
+        degree = new JTextField(5);
+        degree.setEditable(false);
+
+        submitButton = new JButton("submit");
+
+        optionPanel.add(label1);
+        optionPanel.add(setX);
+        optionPanel.add(label2);
+        optionPanel.add(setY);
+        optionPanel.add(label3);
+        optionPanel.add(degree);
+        optionPanel.add(submitButton); 
+    }
+
+    public void setDegreeShow(String s) {
+        degree.setText(s);
     }
 
     @Override
@@ -83,7 +94,7 @@ public class Window extends JFrame implements ActionListener {
 
                 this.remove(component);
 
-                component = new ChessBoard(x, y);
+                component = new ChessBoard(x, y, this);
 
                 this.add(component, BorderLayout.CENTER);
 

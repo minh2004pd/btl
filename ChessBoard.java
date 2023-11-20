@@ -25,31 +25,38 @@ public class ChessBoard extends JComponent {
     private final int Square_Width = 65;
     public ArrayList<Piece> White_Pieces;
     public ArrayList<Piece> Black_Pieces;
+    public ArrayList<Piece> Check_Pieces;
+
+    private Window window;
     
 
     public ArrayList<DrawingShape> Static_Shapes;
     public ArrayList<DrawingShape> Piece_Graphics;
 
     public Piece Active_Piece;
+    public Piece Stop_Piece;
 
     private final int rows = 8;
     private final int cols = 8;
     private Integer[][] BoardGrid;
     private String board_file_path = "D:\\OneDrive\\Máy tính\\btl\\images\\board.png";
-    private String active_square_file_path = "C:\\Users\\doand\\OneDrive\\Desktop\\btl\\images\\active_square.png";
+    private String active_square_file_path = "active_square.png";
+    private String stop_square_file_path = "stop.png";
 
     private Knight knight;
     private Knight knight2;
 
-    public ChessBoard(int x, int y) {
+    public ChessBoard(int x, int y, Window window) {
         this.x = x;
         this.y = y;
+        this.window = window;
 
         BoardGrid = new Integer[rows][cols];
         Static_Shapes = new ArrayList();
         Piece_Graphics = new ArrayList();
         White_Pieces = new ArrayList();
         Black_Pieces = new ArrayList();
+        Check_Pieces = new ArrayList<>();
 
         initGrid();
 
@@ -85,11 +92,30 @@ public class ChessBoard extends JComponent {
         for (int i = 0; i < 8; i++) {
             nextx = x + xMove[i];
             nexty = y + yMove[i];
-            int degree = getDegree(nextx, nexty);
-            if (isValidMove(nextx, nexty) && BoardGrid[nexty][nextx] == 0 && degree < minDegree) {
-
-                minDegree = degree;
-                minDegreeIndex = i;
+            int degree = getDegree(nextx, nexty) - 1;
+            if (isValidMove(nextx, nexty) && BoardGrid[nexty][nextx] == 0) {
+                Active_Piece = new Knight(nextx, nexty, true, active_square_file_path, this);
+                window.setDegreeShow(degree + "");
+                drawBoard();
+                try {
+                    Thread.sleep(900);
+                } catch (InterruptedException e) {
+                    // TODO: handle exception
+                    return 1;
+                }
+                if (degree < minDegree) {
+                    System.out.println(nextx + " " + nexty);
+                    Stop_Piece = new Knight(nextx, nexty, false, stop_square_file_path, this);
+                    drawBoard();
+                    try {
+                        Thread.sleep(900);
+                    } catch (InterruptedException e) {
+                        // TODO: handle exception
+                        return 1;
+                    }
+                    minDegree = degree;
+                    minDegreeIndex = i;
+                }
             }
         }
     
@@ -166,8 +192,13 @@ public class ChessBoard extends JComponent {
         Static_Shapes.add(new DrawingImage(board, new Rectangle2D.Double(0, 0, board.getWidth(null), board.getHeight(null))));
         if (Active_Piece != null)
         {
-            Image active_square = loadImage(active_square_file_path);
+            Image active_square = loadImage("images" + File.separator + Active_Piece.getFilePath());
             Static_Shapes.add(new DrawingImage(active_square, new Rectangle2D.Double(Square_Width*Active_Piece.getX(),Square_Width*Active_Piece.getY(), active_square.getWidth(null), active_square.getHeight(null))));
+        }
+        if (Stop_Piece != null)
+        {
+            Image stop_square = loadImage("images" + File.separator + Stop_Piece.getFilePath());
+            Static_Shapes.add(new DrawingImage(stop_square, new Rectangle2D.Double(Square_Width*Stop_Piece.getX(),Square_Width*Stop_Piece.getY(), stop_square.getWidth(null), stop_square.getHeight(null))));
         }
         for (int i = 0; i < White_Pieces.size(); i++)
         {
@@ -254,19 +285,7 @@ public class ChessBoard extends JComponent {
     // }
 
     public static void main(String[] args) {
-        ChessBoard chessBoard = new ChessBoard(4,4);
-        JFrame frame = new JFrame();
-        frame.setSize(600, 600);
-        frame.getContentPane().add(chessBoard);
-        frame.setLocationRelativeTo(null);
-        frame.setBackground(Color.LIGHT_GRAY);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        try {
-            chessBoard.KnightTour(4, 4, 1);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        System.out.println("Hello");
     }
+
 }
