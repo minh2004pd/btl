@@ -28,9 +28,12 @@ public class Window extends JFrame implements ActionListener {
     private JTextField setX;
     private JTextField setY;
     private JTextField degree;
-    private JButton submitButton;
+    private JButton BTKButton;
+    private JButton resultButton;
+    private JButton WarnsdorffButton; 
     private ChessBoard component;
     private Thread thread;
+
 
     public Window(int x, int y) {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -44,7 +47,9 @@ public class Window extends JFrame implements ActionListener {
 
         setX.addActionListener(this);
         setY.addActionListener(this);
-        submitButton.addActionListener(this);
+        BTKButton.addActionListener(this);
+        WarnsdorffButton.addActionListener(this);
+        resultButton.addActionListener(this);
 
         this.setLocation(200, 50);
         this.pack();
@@ -65,7 +70,10 @@ public class Window extends JFrame implements ActionListener {
         degree = new JTextField(5);
         degree.setEditable(false);
 
-        submitButton = new JButton("submit");
+        BTKButton = new JButton("BTK");
+        WarnsdorffButton = new JButton("Warnsdorff");
+        resultButton = new JButton("result");
+
 
         optionPanel.add(label1);
         optionPanel.add(setX);
@@ -73,7 +81,9 @@ public class Window extends JFrame implements ActionListener {
         optionPanel.add(setY);
         optionPanel.add(label3);
         optionPanel.add(degree);
-        optionPanel.add(submitButton); 
+        optionPanel.add(BTKButton); 
+        optionPanel.add(WarnsdorffButton);
+        optionPanel.add(resultButton);
     }
 
     public void setDegreeShow(String s) {
@@ -82,7 +92,73 @@ public class Window extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == submitButton) {
+        if (e.getSource() == BTKButton) {
+            try {
+                int x = Integer.parseInt(setX.getText());
+                int y = Integer.parseInt(setY.getText());
+
+                if (thread != null && thread.isAlive()) {
+                    System.out.println("end");
+                    thread.interrupt();
+                }
+
+                this.remove(component);
+
+                component = new ChessBoard(x, y, this);
+
+                this.add(component, BorderLayout.CENTER);
+
+                this.revalidate();
+                this.repaint();
+
+                thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            component.KnightTour1(x, y, 1);
+                        } catch (InterruptedException err) {
+                            err.printStackTrace();
+                        }
+                    }
+                });
+
+                thread.start();
+
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(null, "Please enter valid integers for X and Y");
+            }
+        } else if (e.getSource() == resultButton) {
+            try {
+                int x = Integer.parseInt(setX.getText());
+                int y = Integer.parseInt(setY.getText());
+
+                if (thread != null && thread.isAlive()) {
+                    System.out.println("end");
+                    thread.interrupt();
+                }
+
+                this.remove(component);
+
+                component = new ChessBoard(x, y, this);
+
+                this.add(component, BorderLayout.CENTER);
+
+                this.revalidate();
+                this.repaint();
+
+                thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        component.KnightTour2(x, y, 1);
+                    }
+                });
+
+                thread.start();
+
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(null, "Please enter valid integers for X and Y");
+            }
+        } else if (e.getSource() == WarnsdorffButton) {
             try {
                 int x = Integer.parseInt(setX.getText());
                 int y = Integer.parseInt(setY.getText());

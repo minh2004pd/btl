@@ -23,8 +23,8 @@ public class ChessBoard extends JComponent {
     private static Image NULL_IMAGE = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
 
     private final int Square_Width = 65;
-    public ArrayList<Piece> White_Pieces;
-    public ArrayList<Piece> Black_Pieces;
+    public ArrayList<Piece> Black_pieces;
+    public ArrayList<Piece> Standing_pieces;
     public ArrayList<Piece> Check_Pieces;
 
     private Window window;
@@ -54,8 +54,8 @@ public class ChessBoard extends JComponent {
         BoardGrid = new Integer[rows][cols];
         Static_Shapes = new ArrayList();
         Piece_Graphics = new ArrayList();
-        White_Pieces = new ArrayList();
-        Black_Pieces = new ArrayList();
+        Black_pieces = new ArrayList();
+        Standing_pieces = new ArrayList();
         Check_Pieces = new ArrayList<>();
 
         initGrid();
@@ -65,13 +65,104 @@ public class ChessBoard extends JComponent {
         this.setMinimumSize(new Dimension(100, 100));
         this.setMaximumSize(new Dimension(1000, 1000));
 
-        knight = new Knight(x,y,true,"knight1.png",this);
-        White_Pieces.add(knight);
+        knight = new Knight(x,y,false,"knight1.png",this);
+        Black_pieces.add(knight);
 
         drawBoard();
     }
     public boolean isValidMove(int x, int y) {
         return x >= 0 && x < 8 && y >= 0 && y < 8 && !isGridFilled(x, y);
+    }
+
+    public int KnightTour2(int x, int y, int movei) {
+        int nextx, nexty;
+        if (movei == 8*8) {
+            drawBoard();
+            return 1;
+        }
+    
+        int minDegreeIndex = -1;
+        int minDegree = 9;
+    
+        for (int i = 0; i < 8; i++) {
+            nextx = x + xMove[i];
+            nexty = y + yMove[i];
+            int degree = getDegree(nextx, nexty) - 1;
+            if (isValidMove(nextx, nexty) && BoardGrid[nexty][nextx] == 0) {
+                Active_Piece = new Knight(nextx, nexty, true, active_square_file_path, this);
+                window.setDegreeShow(degree + "");
+                if (degree < minDegree) {
+                    Stop_Piece = new Knight(nextx, nexty, false, stop_square_file_path, this);
+                    minDegree = degree;
+                    minDegreeIndex = i;
+                }
+            }
+        }
+    
+        if (minDegreeIndex != -1) {
+            nextx = x + xMove[minDegreeIndex];
+            nexty = y + yMove[minDegreeIndex];
+            knight.setX(nextx);
+            knight.setY(nexty);
+            BoardGrid[y][x] = 1;
+            knight2 = new Knight(x, y, false, movei + ".png", this);
+            Standing_pieces.add(knight2);
+            Black_pieces.remove(0);
+            Black_pieces.add(knight);
+            if (KnightTour2(nextx, nexty, movei + 1) == 1) {
+                return 1;
+            } else {
+                knight.setX(x);
+                knight.setY(y);
+                BoardGrid[y][x] = 0;
+                Standing_pieces.remove(Standing_pieces.size()-1);
+            }
+        }
+        return 0;
+    }
+
+    public int KnightTour1(int x, int y, int movei) throws InterruptedException {
+        try {
+            Thread.sleep(800);
+        } catch (InterruptedException e) {
+            // TODO: handle exception
+            return 1;
+        }
+        int nextx, nexty;
+        if (movei == 8*8) {
+            return 1;
+        }
+
+        for (int i = 0; i < 8; i++) {
+            nextx = x + xMove[i];
+            nexty = y + yMove[i];
+            if (isValidMove(nextx, nexty)) {
+                knight.setX(nextx);
+                knight.setY(nexty);
+                BoardGrid[y][x] = 1;
+                knight2 = new Knight(x, y, true, movei + ".png", this);
+                Standing_pieces.add(knight2);
+                Black_pieces.remove(0);
+                Black_pieces.add(knight);
+                drawBoard();
+                if (KnightTour1(nextx, nexty, movei + 1) == 1) {
+                    return 1;
+                } else {
+                    knight.setX(x);
+                    knight.setY(y);
+                    BoardGrid[y][x] = 0;
+                    Standing_pieces.remove(Standing_pieces.size()-1);
+                    drawBoard();
+                    try {
+                        Thread.sleep(800);
+                    } catch (InterruptedException e) {
+                        // TODO: handle exception
+                        return 1;
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
     public int KnightTour(int x, int y, int movei) throws InterruptedException {
@@ -125,10 +216,10 @@ public class ChessBoard extends JComponent {
             knight.setX(nextx);
             knight.setY(nexty);
             BoardGrid[y][x] = 1;
-            knight2 = new Knight(x, y, false, "knight.png", this);
-            Black_Pieces.add(knight2);
-            White_Pieces.remove(0);
-            White_Pieces.add(knight);
+            knight2 = new Knight(x, y, false, movei + ".png", this);
+            Standing_pieces.add(knight2);
+            Black_pieces.remove(0);
+            Black_pieces.add(knight);
             drawBoard();
             if (KnightTour(nextx, nexty, movei + 1) == 1) {
                 return 1;
@@ -136,7 +227,7 @@ public class ChessBoard extends JComponent {
                 knight.setX(x);
                 knight.setY(y);
                 BoardGrid[y][x] = 0;
-                Black_Pieces.remove(Black_Pieces.size()-1);
+                Standing_pieces.remove(Standing_pieces.size()-1);
                 drawBoard();
                 try {
                     Thread.sleep(800);
@@ -200,24 +291,24 @@ public class ChessBoard extends JComponent {
             Image stop_square = loadImage("images" + File.separator + Stop_Piece.getFilePath());
             Static_Shapes.add(new DrawingImage(stop_square, new Rectangle2D.Double(Square_Width*Stop_Piece.getX(),Square_Width*Stop_Piece.getY(), stop_square.getWidth(null), stop_square.getHeight(null))));
         }
-        for (int i = 0; i < White_Pieces.size(); i++)
+        for (int i = 0; i < Black_pieces.size(); i++)
         {
-            int COL = White_Pieces.get(i).getX();
-            int ROW = White_Pieces.get(i).getY();
+            int COL = Black_pieces.get(i).getX();
+            int ROW = Black_pieces.get(i).getY();
             // for (int i1=0; i1<rows; i1++) {
             //     for(int j=0; j<cols; j++) {
             //         System.out.print(BoardGrid[i1][j]);
             //     }
             //     System.out.println("");
             // }
-            Image piece = loadImage("images" + File.separator + "white_pieces" + File.separator + White_Pieces.get(i).getFilePath());  
+            Image piece = loadImage("images" + File.separator + "black_pieces" + File.separator + Black_pieces.get(i).getFilePath());  
             Piece_Graphics.add(new DrawingImage(piece, new Rectangle2D.Double(Square_Width*COL,Square_Width*ROW, piece.getWidth(null), piece.getHeight(null))));
         }
-        for (int i = 0; i < Black_Pieces.size(); i++)
+        for (int i = 0; i < Standing_pieces.size(); i++)
         {
-            int COL = Black_Pieces.get(i).getX();
-            int ROW = Black_Pieces.get(i).getY();
-            Image piece = loadImage("images" + File.separator + "black_pieces" + File.separator + Black_Pieces.get(i).getFilePath());  
+            int COL = Standing_pieces.get(i).getX();
+            int ROW = Standing_pieces.get(i).getY();
+            Image piece = loadImage("images" + File.separator + "standing_pieces" + File.separator + Standing_pieces.get(i).getFilePath());  
             Piece_Graphics.add(new DrawingImage(piece, new Rectangle2D.Double(Square_Width*COL,Square_Width*ROW, piece.getWidth(null), piece.getHeight(null))));
         }
         this.repaint();
@@ -252,14 +343,14 @@ public class ChessBoard extends JComponent {
     }
 
     public Piece getPiece(int x, int y) {
-        for (Piece p : White_Pieces)
+        for (Piece p : Black_pieces)
         {
             if (p.getX() == x && p.getY() == y)
             {
                 return p;
             }
         }
-        for (Piece p : Black_Pieces)
+        for (Piece p : Standing_pieces)
         {
             if (p.getX() == x && p.getY() == y)
             {
